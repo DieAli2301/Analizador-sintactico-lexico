@@ -28,7 +28,7 @@ def index():
 
         # Calcular recuentos por columna
         for token in tokens:
-            if token.type in ['FOR', 'VAR', 'CONSOLE', 'LOG', 'GLOBAL','INT','SYSTEM','PRINTLN','OUT']:
+            if token.type in ['FOR', 'VAR', 'CONSOLE', 'LOG', 'GLOBAL','INT','SYSTEM','PRINTLN','OUT','INT','FLOAT','INPUT','WHILE','RANGE']:
                 counts['reserved'] += 1
             elif token.type == 'ID':
                 counts['id'] += 1

@@ -31,7 +31,7 @@
                     {% for token in tokens %}
                     <tr>
                         <td>{{ token.value }}</td>
-                        <td>{{ 'X' if token.type in ['FOR', 'VAR', 'CONSOLE', 'LOG', 'GLOBAL','INT','SYSTEM','PRINTLN','OUT'] else '' }}</td>
+                        <td>{{ 'X' if token.type in ['FOR', 'VAR', 'CONSOLE', 'LOG', 'GLOBAL','INT','SYSTEM','PRINTLN','OUT','INT','FLOAT','INPUT','WHILE','RANGE'] else '' }}</td>
                         <td>{{ 'X' if token.type == 'ID' else '' }}</td>
                         <td>{{ 'X' if token.type == 'NUMBER' else '' }}</td>
                         <td>{{ 'X' if token.type in ['PLUS', 'MINUS', 'TIMES', 'DIVIDE', 'ASSIGN', 'LT', 'LE', 'GT', 'GE', 'EQ', 'NE', 'DOT', 'SEMICOLON', 'COMMA', 'SINGLE_QUOTE'] else '' }}</td>
