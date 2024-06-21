@@ -1,83 +1,51 @@
-# lexer.py
-import ply.lex as lex
+import re
 
-# Palabras reservadas
-reserved = {
-    'VAR': 'VAR',
-    'FOR': 'FOR',
-    'CONSOLE': 'CONSOLE',
-    'LOG': 'LOG',
-    'GLOBAL': 'GLOBAL',
-    'INT': 'INT',
-    'OUT': 'OUT',
-    'PRINTLN': 'PRINTLN',
-    'SYSTEM': 'SYSTEM',
-    'IF': 'IF',
-    'WHILE': 'WHILE',
-    'FLOAT': 'FLOAT',
-    'STRING': 'STRING',
-    'INPUT': 'INPUT',
-    'AND': 'AND',
-    'IN': 'IN',
-    'RANGE': 'RANGE'
-}
+# Definición de los tipos de tokens
+token_specification = [
+    ('NUMBER',  r'\d+(\.\d*)?'),       # Números
+    ('ID',      r'[A-Za-z_]\w*'),      # Identificadores
+    ('OP',      r'(\+\+|<=|>=|==|!=|<|>|\+|-|\*|\/|\.)'),  # Operadores, incluyendo punto y otros operadores aritméticos
+    ('LPAREN',  r'\('),                # Paréntesis izquierdo
+    ('RPAREN',  r'\)'),                # Paréntesis derecho
+    ('LBRACE',  r'\{'),                # Llave izquierda
+    ('RBRACE',  r'\}'),                # Llave derecha
+    ('SEMICOLON', r';'),               # Punto y coma
+    ('EQ',      r'='),                 # Igual
+    ('STRING',  r'"[^"]*"'),           # Cadenas de texto
+    ('SKIP',    r'[ \t]+'),            # Espacios y tabulaciones
+    ('NEWLINE', r'\n'),                # Nuevas líneas
+    ('MISMATCH',r'.'),                 # Cualquier otro carácter
+]
 
-# Lista de tokens incluyendo las palabras reservadas
-tokens = [
-    'ID', 'NUMBER', 'FLOAT_LITERAL', 'STRING_LITERAL', 'PLUS', 'MINUS', 'TIMES', 'DIVIDE', 'ASSIGN',
-    'LPAREN', 'RPAREN', 'LBRACE', 'RBRACE', 'SEMICOLON', 'COMMA', 'LT', 'LE',
-    'GT', 'GE', 'EQ', 'NE', 'DOT', 'SINGLE_QUOTE'
-] + list(reserved.values())
+tok_regex = '|'.join('(?P<%s>%s)' % pair for pair in token_specification)
+get_token = re.compile(tok_regex).match
 
-# Reglas simples para los tokens
-t_PLUS = r'\+'
-t_MINUS = r'-'
-t_TIMES = r'\*'
-t_DIVIDE = r'/'
-t_ASSIGN = r'='
-t_LPAREN = r'\('
-t_RPAREN = r'\)'
-t_LBRACE = r'\{'
-t_RBRACE = r'\}'
-t_SEMICOLON = r';'
-t_COMMA = r','
-t_LT = r'<'
-t_LE = r'<='
-t_GT = r'>'
-t_GE = r'>='
-t_EQ = r'=='
-t_NE = r'!='
-t_DOT = r'\.'
-t_SINGLE_QUOTE = r"\'"
+class Token:
+    def __init__(self, type, value, line):
+        self.type = type
+        self.value = value
+        self.line = line
 
-def t_FLOAT_LITERAL(t):
-    r'\d+\.\d+'
-    t.value = float(t.value)
-    return t
+def lex(text):
+    line_num = 1
+    pos = line_start = 0
+    mo = get_token(text)
+    tokens = []
+    while mo is not None:
+        typ = mo.lastgroup
+        val = mo.group(typ)
+        if typ == 'NEWLINE':
+            line_start = pos
+            line_num += 1
+        elif typ != 'SKIP' and typ != 'MISMATCH':
+            token = Token(typ, val, line_num)
+            tokens.append(token)
+        pos = mo.end()
+        mo = get_token(text, pos)
+    return tokens
 
-def t_STRING_LITERAL(t):
-    r'"[^"]*"'
-    t.value = t.value.strip('"')
-    return t
-
-def t_ID(t):
-    r'[a-zA-Z_][a-zA-Z_0-9]*'
-    t.type = reserved.get(t.value.upper(), 'ID')
-    return t
-
-def t_NUMBER(t):
-    r'\d+'
-    t.value = int(t.value)
-    return t
-
-t_ignore = ' \t'
-
-def t_newline(t):
-    r'\n+'
-    t.lexer.lineno += t.value.count('\n')
-
-def t_error(t):
-    print(f"Línea {t.lineno}.- Caracter ilegal '{t.value[0]}'")
-    t.lexer.skip(1)
-
-lexer = lex.lex()
+if __name__ == '__main__':
+    code = 'global'
+    tokens = lex(code)
+    for token in tokens:
+        print(f'{token.type}: {token.value}')
